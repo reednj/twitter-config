@@ -1,5 +1,7 @@
 # Twitter::Config
 
+Lets the twitter gem load its tokens from a config file, instead of having to be specified in code.
+
 ## Installation
 
 Add this line to your application's Gemfile:
