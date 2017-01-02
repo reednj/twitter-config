@@ -13,18 +13,21 @@ require "twitter/config/version"
 module Twitter::Config
 	class YAMLConfig
 		def self.for_user(username, options = {})
-			path = _twitter_config_file options[:path]
+			path = options[:path] || "#{ENV['HOME']}/.trc"
 			config_data = YAML.load_file path
-			user_config = config_data[username]
+			user_config = {}
+
+			# we want to be able to handle two different formats - the simple one
+			# with just a list of usernames, and the more complicated .trc format
+			# that has the app ids in it etc
+			if config_data['profiles'].nil?
+				user_config = config_data[username]
+			else
+				user_config = config_data['profiles'][username].values.first
+			end
+
 			raise "no config found for #{username} in file #{path}" if user_config.nil?
-
 			return user_config
-		end
-
-		def self._twitter_config_file(path = nil)
-			result = [path, "#{ENV['HOME']}/.twitter.yaml", './twitter.yaml'].compact.select{ |f| File.exist? f }.first
-			raise 'could not find twitter config' if result.nil?
-			return result
 		end
 	end
 end
@@ -32,8 +35,13 @@ end
 module Twitter::REST
 	class Client
 		def self.from_config(username, options = {})
-			self.new Twitter::Config::YAMLConfig.for_user username, options
-
+			trc_config = Twitter::Config::YAMLConfig.for_user username, options
+			self.new({
+				:consumer_key => trc_config['consumer_key'],
+				:consumer_secret => trc_config['consumer_secret'],
+				:access_token => trc_config['token'] || trc_config['access_token'],
+				:access_token_secret => trc_config['secret'] || trc_config['access_token_secret']
+			})
 		end
 	end
 end
