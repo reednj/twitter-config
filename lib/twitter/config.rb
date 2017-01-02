@@ -1,3 +1,4 @@
+require 'yaml'
 require "twitter/config/version"
 
 # The config file should have the following format:
