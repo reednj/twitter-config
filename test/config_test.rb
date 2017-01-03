@@ -36,15 +36,25 @@ class ConfigTest < Test::Unit::TestCase
         assert config[:access_token_secret] == "QPAstuv77w7CtuVe1234gItL7OUL1t0ndpNr3Km"
     end
 
-    def test_missing_user
+    def test_missing_user_simple
         begin
             Twitter::Config::YAMLConfig.for_user('fake_user', :path => './test/simple.yaml')
-        rescue
+        rescue => e
+            assert e.to_s.include?('fake_user'), 'username expected in exception message'
             thrown = true
         end
-
         assert thrown, "exception not thrown for missing user"
+    end
 
+
+    def test_missing_user_trc
+        begin
+            Twitter::Config::YAMLConfig.for_user('fake_user', :path => './test/trc.yaml')
+        rescue => e
+            assert e.to_s.include?('fake_user'), "username expected in exception message (#{e})"
+            thrown = true
+        end
+        assert thrown, "exception not thrown for missing user"
     end
 
     def test_default_file_load
@@ -55,7 +65,7 @@ class ConfigTest < Test::Unit::TestCase
     def test_missing_config
         begin
             Twitter::Config::YAMLConfig.for_user('reednj', :path => 'fake.yaml')
-        rescue
+        rescue => e
             thrown = true
         end
 
