@@ -51,4 +51,14 @@ class ConfigTest < Test::Unit::TestCase
         ENV['HOME'] = './test'
         valid_config! Twitter::Config::YAMLConfig.for_user('reednj')
     end
+
+    def test_missing_config
+        begin
+            Twitter::Config::YAMLConfig.for_user('reednj', :path => 'fake.yaml')
+        rescue
+            thrown = true
+        end
+
+        assert thrown, "exception not thrown for missing config"
+    end
 end
