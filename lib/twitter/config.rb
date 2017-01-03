@@ -15,18 +15,19 @@ module Twitter::Config
 		def self.for_user(username, options = {})
 			path = options[:path] || "#{ENV['HOME']}/.trc"
 			config_data = YAML.load_file path
-			user_config = {}
+			user_config = nil
 
 			# we want to be able to handle two different formats - the simple one
 			# with just a list of usernames, and the more complicated .trc format
 			# that has the app ids in it etc
 			if config_data['profiles'].nil?
 				user_config = config_data[username]
-			else
+			elsif !config_data['profiles'][username].nil?
 				user_config = config_data['profiles'][username].values.first
 			end
 
 			raise "no config found for #{username} in file #{path}" if user_config.nil?
+
 			return {
 				:consumer_key => user_config['consumer_key'],
 				:consumer_secret => user_config['consumer_secret'],
