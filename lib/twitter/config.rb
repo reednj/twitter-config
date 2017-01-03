@@ -27,7 +27,12 @@ module Twitter::Config
 			end
 
 			raise "no config found for #{username} in file #{path}" if user_config.nil?
-			return user_config
+			return {
+				:consumer_key => user_config['consumer_key'],
+				:consumer_secret => user_config['consumer_secret'],
+				:access_token => user_config['token'] || user_config['access_token'],
+				:access_token_secret => user_config['secret'] || user_config['access_token_secret']
+			}
 		end
 	end
 end
@@ -36,12 +41,7 @@ module Twitter::REST
 	class Client
 		def self.from_config(username, options = {})
 			trc_config = Twitter::Config::YAMLConfig.for_user username, options
-			self.new({
-				:consumer_key => trc_config['consumer_key'],
-				:consumer_secret => trc_config['consumer_secret'],
-				:access_token => trc_config['token'] || trc_config['access_token'],
-				:access_token_secret => trc_config['secret'] || trc_config['access_token_secret']
-			})
+			self.new(trc_config)
 		end
 	end
 end
